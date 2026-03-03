@@ -4,7 +4,7 @@ import os
 import time
 from typing import Optional
 
-from ..storage import IndexStore, record_savings, estimate_savings
+from ..storage import IndexStore, record_savings, estimate_savings, cost_avoided
 from ..parser import build_symbol_tree
 
 
@@ -88,6 +88,7 @@ def get_file_outline(
             "symbol_count": len(symbols_output),
             "tokens_saved": tokens_saved,
             "total_tokens_saved": total_saved,
+            **cost_avoided(tokens_saved, total_saved),
         },
     }
 

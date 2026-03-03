@@ -5,7 +5,7 @@ import os
 import time
 from typing import Optional
 
-from ..storage import IndexStore, record_savings, estimate_savings
+from ..storage import IndexStore, record_savings, estimate_savings, cost_avoided as _cost_avoided
 
 
 def _make_meta(timing_ms: float, **kwargs) -> dict:
@@ -105,6 +105,7 @@ def get_symbol(
     total_saved = record_savings(tokens_saved)
     meta["tokens_saved"] = tokens_saved
     meta["total_tokens_saved"] = total_saved
+    meta.update(_cost_avoided(tokens_saved, total_saved))
 
     elapsed = (time.perf_counter() - start) * 1000
 
@@ -210,5 +211,6 @@ def get_symbols(
         "symbols": symbols,
         "errors": errors,
         "_meta": _make_meta(elapsed, symbol_count=len(symbols),
-                            tokens_saved=tokens_saved, total_tokens_saved=total_saved),
+                            tokens_saved=tokens_saved, total_tokens_saved=total_saved,
+                            **_cost_avoided(tokens_saved, total_saved)),
     }

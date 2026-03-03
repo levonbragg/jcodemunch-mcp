@@ -4,7 +4,7 @@ import os
 import time
 from typing import Optional
 
-from ..storage import IndexStore, CodeIndex, record_savings, estimate_savings
+from ..storage import IndexStore, CodeIndex, record_savings, estimate_savings, cost_avoided
 
 
 def search_symbols(
@@ -105,6 +105,7 @@ def search_symbols(
             "truncated": len(results) > max_results,
             "tokens_saved": tokens_saved,
             "total_tokens_saved": total_saved,
+            **cost_avoided(tokens_saved, total_saved),
         },
     }
 

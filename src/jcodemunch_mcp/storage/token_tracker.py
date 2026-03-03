@@ -16,6 +16,12 @@ from typing import Optional
 _SAVINGS_FILE = "_savings.json"
 _BYTES_PER_TOKEN = 4  # ~4 bytes per token (rough but consistent)
 
+# Input token pricing ($ per token). Update as models reprice.
+_PRICING = {
+    "claude_opus": 15.00 / 1_000_000,   # Claude Opus — $15/1M input tokens
+    "gpt4o":        2.50 / 1_000_000,   # GPT-4o      — $2.50/1M input tokens
+}
+
 
 def _savings_path(base_path: Optional[str] = None) -> Path:
     root = Path(base_path) if base_path else Path.home() / ".code-index"
@@ -54,3 +60,24 @@ def get_total_saved(base_path: Optional[str] = None) -> int:
 def estimate_savings(raw_bytes: int, response_bytes: int) -> int:
     """Estimate tokens saved: (raw - response) / bytes_per_token."""
     return max(0, (raw_bytes - response_bytes) // _BYTES_PER_TOKEN)
+
+
+def cost_avoided(tokens_saved: int, total_tokens_saved: int) -> dict:
+    """Return cost avoided estimates for this call and the running total.
+
+    Returns a dict ready to be merged into a _meta envelope:
+        cost_avoided:       {claude_opus: float, gpt4o: float}
+        total_cost_avoided: {claude_opus: float, gpt4o: float}
+
+    Values are in USD, rounded to 4 decimal places.
+    """
+    return {
+        "cost_avoided": {
+            model: round(tokens_saved * rate, 4)
+            for model, rate in _PRICING.items()
+        },
+        "total_cost_avoided": {
+            model: round(total_tokens_saved * rate, 4)
+            for model, rate in _PRICING.items()
+        },
+    }
