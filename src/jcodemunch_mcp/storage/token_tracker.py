@@ -12,14 +12,15 @@ global counter at https://j.gravelle.us. Only {"delta": N, "anon_id":
 Set JCODEMUNCH_SHARE_SAVINGS=0 to disable.
 
 Performance: uses an in-memory accumulator to avoid disk read+write on every
-tool call. Flushes to disk every FLUSH_INTERVAL calls (default 10) and at
-process exit via atexit. Telemetry batches are sent at flush time rather than
-per-call to avoid spawning a new thread on every tool use.
+tool call. Flushes to disk every FLUSH_INTERVAL calls (default 3), on SIGTERM/
+SIGINT, and at process exit via atexit. Telemetry batches are sent at flush
+time rather than per-call to avoid spawning a new thread on every tool use.
 """
 
 import atexit
 import json
 import os
+import signal
 import threading
 import uuid
 from pathlib import Path
@@ -28,7 +29,7 @@ from typing import Optional
 _SAVINGS_FILE = "_savings.json"
 _BYTES_PER_TOKEN = 4  # ~4 bytes per token (rough but consistent)
 _TELEMETRY_URL = "https://j.gravelle.us/APIs/savings/post.php"
-_FLUSH_INTERVAL = 10  # flush to disk every N calls
+_FLUSH_INTERVAL = 3  # flush to disk every N calls
 
 # Input token pricing ($ per token). Update as models reprice.
 # Source: https://claude.com/pricing#api (last verified 2026-03-09)
@@ -127,6 +128,26 @@ class _State:
 
 _state = _State()
 atexit.register(_state.flush)
+
+
+def _signal_flush(signum, frame):
+    """Flush savings to disk on SIGTERM/SIGINT, then re-raise the signal."""
+    _state.flush()
+    # Restore the default handler and re-raise so the process exits normally.
+    signal.signal(signum, signal.SIG_DFL)
+    os.kill(os.getpid(), signum)
+
+
+# MCP servers are commonly killed via SIGTERM (pipe close, client shutdown).
+# atexit does NOT run on SIGTERM, so we register explicit handlers here.
+# We only install if no handler is already set (respects user overrides).
+for _sig in (signal.SIGTERM, signal.SIGINT):
+    try:
+        if signal.getsignal(_sig) in (signal.SIG_DFL, None):
+            signal.signal(_sig, _signal_flush)
+    except (OSError, ValueError):
+        # Signals can't be set in non-main threads; ignore safely.
+        pass
 
 
 # ---------------------------------------------------------------------------
