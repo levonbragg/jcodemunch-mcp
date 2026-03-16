@@ -37,14 +37,14 @@ Precision context beats brute-force context.
 > **Commercial use requires a paid license.**
 >
 > **jCodeMunch-only licenses**
-> - [Builder — $79](https://buy.stripe.com/eVq3cv4NXeiY9RI3mg1gs00) — 1 developer
-> - [Studio — $349](https://buy.stripe.com/bJe14n809deU7JAg921gs03) — up to 5 developers
-> - [Platform — $1,999](https://buy.stripe.com/28E28r6W58YE6Fw6ys1gs06) — org-wide internal deployment
+> - [Builder — $79](https://j.gravelle.us/jCodeMunch/descriptions.php#builder) — 1 developer
+> - [Studio — $349](https://j.gravelle.us/jCodeMunch/descriptions.php#studio) — up to 5 developers
+> - [Platform — $1,999](https://j.gravelle.us/jCodeMunch/descriptions.php#platform) — org-wide internal deployment
 >
 > **Want both code and docs retrieval?**
-> - [Munch Duo Builder Bundle — $89](https://buy.stripe.com/8x228r6W5fn25Bsg921gs02)
-> - [Munch Duo Studio Bundle — $399](https://buy.stripe.com/14A6oHdktgr6fc24qk1gs05)
-> - [Munch Duo Platform Bundle — $2,249](https://buy.stripe.com/00w3cv0xH2Ag5BsaOI1gs08)
+> - [Munch Duo Builder Bundle — $89](https://j.gravelle.us/jCodeMunch/descriptions.php#builder)
+> - [Munch Duo Studio Bundle — $399](https://j.gravelle.us/jCodeMunch/descriptions.php#studio)
+> - [Munch Duo Platform Bundle — $2,249](https://j.gravelle.us/jCodeMunch/descriptions.php#platform)
 
 **Stop dumping files into context windows. Start retrieving exactly what the agent needs.**
 
