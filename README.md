@@ -321,6 +321,52 @@ Ask Claude: *"What repos do you have indexed?"* — it should call `list_repos`.
 
 ---
 
+## File Watching (Large Repos)
+
+For large monorepos where re-indexing after every edit is too slow, run the `watch` subcommand as a background daemon. It monitors directories for filesystem changes and triggers incremental re-indexing automatically — the MCP server sees updates immediately since they share the same index storage (`~/.code-index/`).
+
+### Install the watch extra
+
+**With pip:**
+
+```bash
+pip install "jcodemunch-mcp[watch]"
+```
+
+**With uvx** (note the `--with` flag — `uvx` alone won't install optional extras):
+
+```bash
+uvx --with "jcodemunch-mcp[watch]" jcodemunch-mcp watch /path/to/repo
+```
+
+### Usage
+
+The `watch` command accepts **one or more directory paths** as positional arguments. Each directory gets its own watcher and is re-indexed independently when files change.
+
+```bash
+# Single directory
+jcodemunch-mcp watch /path/to/monorepo
+
+# Multiple directories — useful when working with Claude Code worktrees,
+# where each worktree is a separate filesystem copy that needs its own index
+jcodemunch-mcp watch /path/to/repo \
+  ~/.claude-worktrees/repo/worktree1 \
+  ~/.claude-worktrees/repo/worktree2
+```
+
+### CLI options
+
+| Flag                  | Default | Description                                    |
+| --------------------- | ------- | ---------------------------------------------- |
+| `--debounce`          | `2000`  | Milliseconds to wait after last change before re-indexing |
+| `--no-ai-summaries`   | off     | Skip AI summary generation during re-index     |
+| `--follow-symlinks`   | off     | Follow symbolic links when watching             |
+| `--extra-ignore`      | —       | Additional glob patterns to ignore (repeatable) |
+
+The watcher runs in the foreground and shuts down cleanly on `Ctrl-C` / `SIGTERM`.
+
+---
+
 ## Usage Examples
 
 ```
@@ -478,8 +524,7 @@ See SECURITY.md for details.
 
 - LSP diagnostics or completions  
 - Editing workflows  
-- Real-time file watching  
-- Cross-repository global indexing  
+- Cross-repository global indexing
 - Semantic program analysis  
 
 ---
