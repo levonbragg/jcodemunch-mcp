@@ -28,6 +28,7 @@ from .tools.find_importers import find_importers
 from .tools.find_references import find_references
 from .tools.get_session_stats import get_session_stats
 from .tools.get_dependency_graph import get_dependency_graph
+from .tools.get_blast_radius import get_blast_radius
 from .tools.search_columns import search_columns
 from .tools.get_context_bundle import get_context_bundle
 from .parser.symbols import VALID_KINDS
@@ -463,6 +464,29 @@ async def list_tools() -> list[Tool]:
                 "required": ["repo", "file"]
             }
         ),
+        Tool(
+            name="get_blast_radius",
+            description="Analyse the blast radius of changing a symbol: find every file that imports its defining file and (optionally) references the symbol by name. Returns 'confirmed' files (import + name match) and 'potential' files (import only, e.g. wildcard). Use before renaming, deleting, or changing a function/class signature.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "repo": {
+                        "type": "string",
+                        "description": "Repository identifier (owner/repo or just repo name)"
+                    },
+                    "symbol": {
+                        "type": "string",
+                        "description": "Symbol name or ID to analyse (e.g. 'calculateScore' or a full symbol ID)"
+                    },
+                    "depth": {
+                        "type": "integer",
+                        "description": "Import hops to traverse (1 = direct importers only, max 3). Default 1.",
+                        "default": 1
+                    }
+                },
+                "required": ["repo", "symbol"]
+            }
+        ),
     ]
 
 
@@ -663,6 +687,16 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
                     repo=arguments["repo"],
                     file=arguments["file"],
                     direction=arguments.get("direction", "imports"),
+                    depth=arguments.get("depth", 1),
+                    storage_path=storage_path,
+                )
+            )
+        elif name == "get_blast_radius":
+            result = await asyncio.to_thread(
+                functools.partial(
+                    get_blast_radius,
+                    repo=arguments["repo"],
+                    symbol=arguments["symbol"],
                     depth=arguments.get("depth", 1),
                     storage_path=storage_path,
                 )
